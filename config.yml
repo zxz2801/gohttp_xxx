@@ -1,0 +1,13 @@
+http_server:
+  port: 11111
+  read_timeout: 60 #second
+  write_timeout: 60 #second
+  idle_timeout: 60 #second
+  max_header_bytes: 4096
+  
+log:
+  base: "./log"
+  file: "go_http_xx.log"
+  rotate_size: 104857600 # 100MB
+  rotate_count: 5
+  level: 5 # 0-PanicLevel 1-FatalLevel 2-ErrorLevel 3-WarnLevel 4-InfoLevel 5-DebugLevel 6-TraceLevel
