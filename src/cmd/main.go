@@ -57,7 +57,8 @@ func daemon() {
 	cmd.Stdin = nil
 	cmd.Stdout = nil
 	cmd.Stderr = nil
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	// cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true} linux
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
 
 	err := cmd.Start()
 	if err == nil {
@@ -77,7 +78,8 @@ func main() {
 
 	c := make(chan os.Signal)
 	signal.Notify(c)
-	signal.Ignore(syscall.SIGCHLD, syscall.SIGPIPE, syscall.SIGHUP)
+	//signal.Ignore(syscall.SIGCHLD, syscall.SIGPIPE, syscall.SIGHUP)
+	signal.Ignore(syscall.SIGPIPE, syscall.SIGHUP)
 
 	server := NewServer()
 

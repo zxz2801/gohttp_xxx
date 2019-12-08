@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"fmt"
@@ -51,7 +51,7 @@ func (b *Server) Start(configPath string) error {
 
 	//mux.Handle("/query", &Query{})
 	// 这里添加业务处理的handle
-	mux.Handle("/query", &query{})
+	//mux.Handle("/query", NewMiddeware("/query", &query{}) )
 	mux.Handle("/metrics", promhttp.HandlerFor(
 		prometheus.Gatherers{
 			prometheus.DefaultGatherer,
@@ -79,42 +79,4 @@ func (b *Server) Start(configPath string) error {
 func (b *Server) Stop() {
 	xxx_log.Logger().Infof("receive stop signal!!!!!!!!")
 	b.server.Close()
-}
-
-// Middleware http middleware
-// 在里面完成prometheus公共操作
-type Middleware struct {
-	realHandler http.Handler
-	reqCnt      prometheus.Counter
-	costCnt     prometheus.Counter
-	errCnt      prometheus.Counter
-}
-
-func NewMiddleware(path string, handler http.Handler) http.Handler {
-	middleware := &Middleware{
-		realHandler: handler,
-		reqCnt: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name: "go_http_xxx_request_total",
-				Help: "Number of mesh all request.",
-			}),
-		costCnt: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name: "go_http_xxx_request_total",
-				Help: "Number of mesh all request.",
-			}),
-		errCnt: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name: "go_http_xxx_request_total",
-				Help: "Number of mesh all request.",
-			}),
-	}
-	return middleware
-}
-
-func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	xxx_log.Logger().Infof("request [%v]", *r)
-	m.realHandler.ServeHTTP(w, r)
-	xxx_log.Logger().Info("response [%v]", *r.Response)
-	m.reqCnt.Inc()
 }
