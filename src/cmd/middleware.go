@@ -19,6 +19,7 @@ type Middleware struct {
 	errCnt      prometheus.Counter
 }
 
+// NewMiddleware ...
 func NewMiddleware(path string, handler http.Handler) http.Handler {
 	middleware := &Middleware{
 		realHandler: handler,
@@ -33,17 +34,17 @@ func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	xxx_log.Logger().Infof("request [%v]", *r)
 	timeStart := time.Now()
 	m.realHandler.ServeHTTP(w, r)
-	timeEnd := tim.Now()
-	xx_log.Logger().Info("response [%v]", w.Header())
+	timeEnd := time.Now()
+	xxx_log.Logger().Info("response [%v]", w.Header())
+	m.reqCnt.Inc()
+	m.costCnt.Add(float64(timeEnd.Sub(timeStart) / time.Millisecond))
+}
 
-
-
-
-// ServiceMetaCollect :
+// ServiceCollect :
 type ServiceCollect struct {
-	ounterVecReq  *prometheus.CounterVec
-CounterVecCost *prometheus.CounterVec
-	CounterVecErr  *promeheus.CounterVec
+	CounterVecReq  *prometheus.CounterVec
+	CounterVecCost *prometheus.CounterVec
+	CounterVecErr  *prometheus.CounterVec
 }
 
 // NewServiceCollect :
@@ -51,30 +52,29 @@ func NewServiceCollect() *ServiceCollect {
 
 	sc := &ServiceCollect{
 		CounterVecReq: prometheus.NewCounterVec(
-			prmetheus.CounterOpts{
+			prometheus.CounterOpts{
 				Name: "go_http_xx_request_total",
 				Help: "Number of go_http_xxx all reques.",
 			},
 			[]string{"path"}),
-		CounterVecCost: prometheus.NewCounterec(
-			prmetheus.CounterOpts{
+		CounterVecCost: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
 				Name: "go_http_xx_cost_total",
 				Help: "Total cost (milliseconds).",
 			},
 			[]string{"path"}),
 		CounterVecErr: prometheus.NewCounterVec(
-			prmetheus.CounterOpts{
+			prometheus.CounterOpts{
 				Name: "go_http_xx_error_total",
-			Help: "Number of go_http_xxx all error.",
-		},
+				Help: "Number of go_http_xxx all error.",
+			},
 			[]string{"path"}),
 	}
 
-	prometheu.DefaultRegisterer.Register(sc.CounterVecReq)
-prometheus.DefaultRegisterer.Register(sc.CounterVecCost)
-	rometheus.DefaultRegisterer.Register(sc.CounterVecErr)
-return sc
-
+	prometheus.DefaultRegisterer.Register(sc.CounterVecReq)
+	prometheus.DefaultRegisterer.Register(sc.CounterVecCost)
+	prometheus.DefaultRegisterer.Register(sc.CounterVecErr)
+	return sc
 }
 
 // serviceCollect :

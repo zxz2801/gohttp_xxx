@@ -9,6 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	xxx_config "github.com/zxz2801/gohttp_xxx/src/pkg/config"
+	xxx_handler "github.com/zxz2801/gohttp_xxx/src/pkg/handler"
 	xxx_log "github.com/zxz2801/gohttp_xxx/src/pkg/log"
 )
 
@@ -49,9 +50,11 @@ func (b *Server) Start(configPath string) error {
 
 	mux := http.NewServeMux()
 
-	//mux.Handle("/query", &Query{})
 	// 这里添加业务处理的handle
-	//mux.Handle("/query", NewMiddeware("/query", &query{}) )
+	xxx_handler.RegistALl(func(path string, realHandler http.Handler) {
+		mux.Handle(path, NewMiddleware(path, realHandler))
+	})
+
 	mux.Handle("/metrics", promhttp.HandlerFor(
 		prometheus.Gatherers{
 			prometheus.DefaultGatherer,
